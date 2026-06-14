@@ -36,6 +36,10 @@ export async function signInWithGoogle() {
     options: {
       redirectTo: `${window.location.origin}/dashboard`,
       skipBrowserRedirect: false,
+      queryParams: {
+        prompt: 'select_account',
+        access_type: 'online',
+      },
     },
   });
 

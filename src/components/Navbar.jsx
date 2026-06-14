@@ -1,6 +1,8 @@
-import { Bell, Menu, RefreshCw } from 'lucide-react';
+import { Bell, LogIn, Menu, RefreshCw } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function Navbar({ user, onMenuClick, onRefresh, refreshing }) {
+  const isAuthenticated = Boolean(user);
   const avatarUrl =
     user?.user_metadata?.avatar_url ||
     user?.user_metadata?.picture ||
@@ -9,8 +11,8 @@ export default function Navbar({ user, onMenuClick, onRefresh, refreshing }) {
     user?.user_metadata?.full_name ||
     user?.user_metadata?.name ||
     user?.email?.split('@')[0] ||
-    'User';
-  const email = user?.email || '';
+    'Guest';
+  const email = user?.email || 'Public access — any Google email';
 
   return (
     <header className="sticky top-0 z-30 border-b border-white/5 bg-gray-950/80 backdrop-blur-xl">
@@ -29,7 +31,7 @@ export default function Navbar({ user, onMenuClick, onRefresh, refreshing }) {
               Student Analytics
             </h1>
             <p className="hidden text-xs text-gray-500 sm:block">
-              Multi-student performance insights
+              Open to everyone — view all student analytics
             </p>
           </div>
         </div>
@@ -55,6 +57,16 @@ export default function Navbar({ user, onMenuClick, onRefresh, refreshing }) {
           >
             <Bell className="h-4 w-4" />
           </button>
+
+          {!isAuthenticated && (
+            <Link
+              to="/login"
+              className="hidden items-center gap-2 rounded-xl border border-violet-500/30 bg-violet-500/10 px-3 py-2 text-sm font-medium text-violet-300 transition-all hover:bg-violet-500/20 sm:flex"
+            >
+              <LogIn className="h-4 w-4" />
+              Sign In
+            </Link>
+          )}
 
           <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/5 px-3 py-1.5">
             {avatarUrl ? (

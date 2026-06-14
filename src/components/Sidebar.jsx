@@ -2,6 +2,7 @@ import {
   BarChart3,
   GraduationCap,
   LayoutDashboard,
+  LogIn,
   LogOut,
   Sparkles,
   X,
@@ -17,6 +18,8 @@ export default function Sidebar({
   activeSection,
   onSectionChange,
   onLogout,
+  onLogin,
+  isAuthenticated,
   isOpen,
   onClose,
 }) {
@@ -87,14 +90,25 @@ export default function Sidebar({
         </nav>
 
         <div className="border-t border-white/5 p-3">
-          <button
-            type="button"
-            onClick={onLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-400 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400"
-          >
-            <LogOut className="h-4 w-4" />
-            Logout
-          </button>
+          {isAuthenticated ? (
+            <button
+              type="button"
+              onClick={onLogout}
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-400 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onLogin}
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-400 transition-all duration-200 hover:bg-violet-500/10 hover:text-violet-300"
+            >
+              <LogIn className="h-4 w-4" />
+              Sign In
+            </button>
+          )}
         </div>
       </aside>
     </>

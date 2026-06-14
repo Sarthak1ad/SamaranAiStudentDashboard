@@ -257,12 +257,21 @@ export default function Dashboard({ sessionUser }) {
   }
 
   async function handleLogout() {
+    if (!sessionUser) {
+      navigate('/login');
+      return;
+    }
+
     try {
       await signOut();
-      navigate('/login', { replace: true });
+      navigate('/dashboard', { replace: true });
     } catch (err) {
       console.error('Logout failed:', err.message);
     }
+  }
+
+  function handleLogin() {
+    navigate('/login');
   }
 
   async function handleRefresh() {
@@ -379,6 +388,8 @@ export default function Dashboard({ sessionUser }) {
         activeSection={activeSection}
         onSectionChange={setActiveSection}
         onLogout={handleLogout}
+        onLogin={handleLogin}
+        isAuthenticated={Boolean(sessionUser)}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />

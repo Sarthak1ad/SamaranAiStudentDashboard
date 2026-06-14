@@ -22,5 +22,6 @@ export function getAppOrigin() {
 }
 
 export function getAuthRedirectUrl() {
-  return `${getAppOrigin()}/dashboard`;
+  // Use /auth/callback — dedicated route that always handles ?code= exchange
+  return `${getAppOrigin()}/auth/callback`;
 }

@@ -33,7 +33,6 @@ export async function signInWithGoogle() {
   }
 
   const redirectTo = getAuthRedirectUrl();
-
   console.info('[Auth] OAuth redirectTo:', redirectTo);
 
   const { data, error } = await supabase.auth.signInWithOAuth({
@@ -57,6 +56,30 @@ export async function signInWithGoogle() {
   return data;
 }
 
+export async function completeOAuthCallback() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  const authError = params.get('error_description') || params.get('error');
+
+  if (authError) {
+    throw new Error(authError);
+  }
+
+  if (!code) {
+    return null;
+  }
+
+  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+  if (error) throw error;
+
+  return data.session;
+}
+
+export function redirectToDashboard() {
+  const dashboardUrl = `${window.location.origin}/dashboard`;
+  window.history.replaceState({}, '', dashboardUrl);
+}
+
 export async function signOut() {
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
@@ -66,12 +89,4 @@ export async function getSession() {
   const { data, error } = await supabase.auth.getSession();
   if (error) throw error;
   return data.session;
-}
-
-export function clearAuthCallbackFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  if (!params.has('code') && !params.has('error')) return;
-
-  const cleanPath = window.location.pathname || '/dashboard';
-  window.history.replaceState({}, '', cleanPath);
 }

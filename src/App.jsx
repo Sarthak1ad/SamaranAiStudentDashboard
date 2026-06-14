@@ -4,9 +4,14 @@ import {
   Navigate,
   Route,
   Routes,
+  useLocation,
 } from 'react-router-dom';
 import LoadingSpinner from './components/LoadingSpinner';
-import { getSession, supabase } from './lib/supabase';
+import {
+  clearAuthCallbackFromUrl,
+  getSession,
+  supabase,
+} from './lib/supabase';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 
@@ -26,7 +31,7 @@ function PublicRoute({ session, loading, children }) {
   return children;
 }
 
-function RootRedirect({ session, loading }) {
+function RootRedirect({ loading }) {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-950">
@@ -38,20 +43,19 @@ function RootRedirect({ session, loading }) {
     );
   }
 
-  if (session && new URLSearchParams(window.location.search).has('code')) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
   return <Navigate to="/dashboard" replace />;
 }
 
 function AppRoutes() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  const hasAuthCallback =
+    new URLSearchParams(location.search).has('code') ||
+    new URLSearchParams(location.search).has('error');
 
   useEffect(() => {
     let mounted = true;
-    const hasAuthCode = new URLSearchParams(window.location.search).has('code');
 
     async function initAuth() {
       try {
@@ -60,8 +64,8 @@ function AppRoutes() {
 
         setSession(currentSession);
 
-        if (hasAuthCode && currentSession) {
-          window.history.replaceState({}, '', '/dashboard');
+        if (hasAuthCallback && currentSession) {
+          clearAuthCallbackFromUrl();
         }
       } catch {
         if (mounted) setSession(null);
@@ -80,8 +84,8 @@ function AppRoutes() {
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
         setSession(newSession);
 
-        if (event === 'SIGNED_IN' && new URLSearchParams(window.location.search).has('code')) {
-          window.history.replaceState({}, '', '/dashboard');
+        if (event === 'SIGNED_IN') {
+          clearAuthCallbackFromUrl();
         }
       }
 
@@ -96,7 +100,18 @@ function AppRoutes() {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [hasAuthCallback]);
+
+  if (hasAuthCallback && loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-950">
+        <div className="text-center">
+          <LoadingSpinner size="lg" className="mb-4" />
+          <p className="text-sm text-gray-500">Completing sign in...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Routes>
@@ -114,7 +129,7 @@ function AppRoutes() {
       />
       <Route
         path="/"
-        element={<RootRedirect session={session} loading={loading} />}
+        element={<RootRedirect loading={loading} />}
       />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

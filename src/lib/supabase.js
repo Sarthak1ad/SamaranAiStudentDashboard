@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { getAuthRedirectUrl } from './authRedirect';
 
 const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim();
 const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
@@ -31,10 +32,14 @@ export async function signInWithGoogle() {
     );
   }
 
+  const redirectTo = getAuthRedirectUrl();
+
+  console.info('[Auth] OAuth redirectTo:', redirectTo);
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${window.location.origin}/dashboard`,
+      redirectTo,
       skipBrowserRedirect: false,
       queryParams: {
         prompt: 'select_account',
@@ -61,4 +66,12 @@ export async function getSession() {
   const { data, error } = await supabase.auth.getSession();
   if (error) throw error;
   return data.session;
+}
+
+export function clearAuthCallbackFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has('code') && !params.has('error')) return;
+
+  const cleanPath = window.location.pathname || '/dashboard';
+  window.history.replaceState({}, '', cleanPath);
 }

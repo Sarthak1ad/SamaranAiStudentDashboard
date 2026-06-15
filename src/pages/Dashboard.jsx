@@ -19,7 +19,6 @@ import StudentSelector from '../components/StudentSelector';
 import SubjectAccuracyChart from '../components/SubjectAccuracyChart';
 import SubjectTable from '../components/SubjectTable';
 import { useAnalytics } from '../hooks/useAnalytics';
-import { signOut } from '../lib/supabase';
 import { formatNumber, formatPercent } from '../services/analyticsService';
 
 function getSubjectList(subjects) {
@@ -257,17 +256,8 @@ export default function Dashboard({ sessionUser }) {
   }
 
   async function handleLogout() {
-    if (!sessionUser) {
-      navigate('/login');
-      return;
-    }
-
-    try {
-      await signOut();
-      navigate('/dashboard', { replace: true });
-    } catch (err) {
-      console.error('Logout failed:', err.message);
-    }
+    // Authentication disabled - just navigate to login
+    navigate('/login', { replace: true });
   }
 
   function handleLogin() {
